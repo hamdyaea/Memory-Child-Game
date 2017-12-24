@@ -153,14 +153,14 @@ def game():
 def begin():
     global slot1, slot2, slot3, slot4, slot5, slot6, front1, front2, front3, front4, front5, front6
     image = slot1, slot2, slot3, slot4, slot5, slot6
-    msg = "                               Memory children Game\n\nEvery player select two cards\n\nOf the two cards are the same the player win 1 point"
+    msg = "                               Memory children Game\n\nEvery player select two cards\n\nIf the two cards are the same the player win 1 point"
     choices = []
     reply = buttonbox(msg, image=image, choices=choices)
 
     if reply == "./images/back1.gif":
         image = front1
-        msg = ["Found a pair ?"]
-        choices = ["Yes","No"]
+        msg = []
+        choices = []
         reply = buttonbox(msg, image=image, choices=choices)
         begin()
 
