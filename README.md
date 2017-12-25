@@ -1,3 +1,6 @@
+[![Awesome](https://awesome.re/badge.svg)](https://awesome.re)  
+
+
 # Memory Children Game
 
 ## What's this game ?  
