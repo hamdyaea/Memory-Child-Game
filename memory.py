@@ -1,207 +1,100 @@
-# Developer : Hamdy Abou El Anein
+#!/usr/bin/env python3
+# Developer: Hamdy Abou El Anein
+# Contact: info@daylightlinux.ch
+# SPDX-License-Identifier: GPL-3.0-only
+"""Simple six-card memory matching game for children."""
+from __future__ import annotations
+from dataclasses import dataclass, field
+import secrets
+import tkinter as tk
+from tkinter import ttk
 
-from easygui import *
-import random
-import sys
+SYMBOLS = ("Cat", "Dog", "Bird")
 
+def shuffled_cards() -> list[str]:
+    cards = list(SYMBOLS) * 2
+    secrets.SystemRandom().shuffle(cards)
+    return cards
 
-child = "./images/child.gif"
-cop = "./images/cop.gif"
-girl = "./images/girl.gif"
-child1 = "./images/child1.gif"
-cop1 = "./images/cop1.gif"
-girl1 = "./images/girl1.gif"
+@dataclass
+class MemoryGame:
+    cards: list[str] = field(default_factory=shuffled_cards)
+    revealed: list[int] = field(default_factory=list)
+    matched: set[int] = field(default_factory=set)
+    moves: int = 0
 
-back1 = "./images/back1.gif"
-back2 = "./images/back2.gif"
-back3 = "./images/back3.gif"
-back4 = "./images/back4.gif"
-back5 = "./images/back5.gif"
-back6 = "./images/back6.gif"
+    def select(self, index: int) -> str:
+        if not 0 <= index < len(self.cards):
+            raise ValueError("Card index out of range")
+        if index in self.matched or index in self.revealed or len(self.revealed) >= 2:
+            return "ignored"
+        self.revealed.append(index)
+        if len(self.revealed) < 2:
+            return "first"
+        self.moves += 1
+        first, second = self.revealed
+        if self.cards[first] == self.cards[second]:
+            self.matched.update((first, second))
+            self.revealed.clear()
+            return "match"
+        return "mismatch"
 
+    def hide_unmatched(self) -> None:
+        self.revealed.clear()
 
-def game():
-    global slot1, slot2, slot3, slot4, slot5, slot6, front1, front2, front3, front4, front5, front6
-    inputNum = 6
-    outputNum = list(range(inputNum + 1))
-    outputNum.remove(0)
-    numbers = random.shuffle(outputNum)
+    @property
+    def won(self) -> bool:
+        return len(self.matched) == len(self.cards)
 
-    slot1 = outputNum[0]
-    if slot1 == 1:
-         slot1 = back1
-         front1 = child
-    elif slot1 == 2:
-         slot1 = back2
-         front1 = cop
-    elif slot1 == 3:
-         slot1 = back3
-         front1 = girl
-    elif slot1 == 4:
-         slot1 = back4
-         front1 = child1
-    elif slot1 == 5:
-         slot1 = back5
-         front1 = cop1
-    else:
-         slot1 = back6
-         front1 = girl1
+def main() -> None:
+    root = tk.Tk()
+    root.title("Memory Game for Children")
+    root.geometry("410x370")
+    game = MemoryGame()
+    frame = ttk.Frame(root, padding=20)
+    frame.pack(fill="both", expand=True)
+    info = tk.StringVar(value="Find the three matching pairs!")
+    ttk.Label(frame, textvariable=info).pack(pady=10)
+    board = ttk.Frame(frame)
+    board.pack()
+    buttons = []
+    waiting = False
+    def render() -> None:
+        for i, button in enumerate(buttons):
+            show = i in game.revealed or i in game.matched
+            button.config(text=game.cards[i] if show else "?", state="disabled" if i in game.matched else "normal")
+    def click(index: int) -> None:
+        nonlocal waiting
+        if waiting:
+            return
+        result = game.select(index)
+        render()
+        if result == "match":
+            info.set("Well done! " + ("All pairs found!" if game.won else f"Moves: {game.moves}"))
+        elif result == "mismatch":
+            info.set("Try again!")
+            waiting = True
+            def hide() -> None:
+                nonlocal waiting
+                game.hide_unmatched()
+                waiting = False
+                render()
+            root.after(900, hide)
+        elif result == "first":
+            info.set("Find its matching card")
+    for i in range(6):
+        button = ttk.Button(board, text="?", width=12, command=lambda n=i: click(n))
+        button.grid(row=i // 3, column=i % 3, padx=4, pady=6, ipady=18)
+        buttons.append(button)
+    def restart() -> None:
+        nonlocal game, waiting
+        if waiting:
+            return
+        game = MemoryGame()
+        info.set("Find the three matching pairs!")
+        render()
+    ttk.Button(frame, text="New game", command=restart).pack(pady=12)
+    root.mainloop()
 
-    slot2 = outputNum[1]
-    if slot2 == 1:
-         slot2 = back1
-         front2 = child
-    elif slot2 == 2:
-         slot2 = back2
-         front2 = cop
-    elif slot2 == 3:
-         slot2 = back3
-         front2 = girl
-    elif slot2 == 4:
-         slot2 = back4
-         front2 = child1
-    elif slot2 == 5:
-         slot2 = back5
-         front2 = cop1
-    else:
-         slot2 = back6
-         front2 = girl1
-
-
-
-    slot3 = outputNum[2]
-    if slot3 == 1:
-         slot3 = back1
-         front3 = child
-    elif slot3 == 2:
-         slot3 = back2
-         front3 = cop
-    elif slot3 == 3:
-         slot3 = back3
-         front3 = girl
-    elif slot3 == 4:
-         slot3 = back4
-         front3 = child1
-    elif slot3 == 5:
-         slot3 = back5
-         front3 = cop1
-    else:
-         slot3 = back6
-         front3 = girl1
-
-
-    slot4 = outputNum[3]
-    if slot4 == 1:
-         slot4 = back1
-         front4 = child
-    elif slot4 == 2:
-         slot4 = back2
-         front4 = cop
-    elif slot4 == 3:
-         slot1 = back3
-         front4 = girl
-    elif slot4 == 4:
-         slot4 = back4
-         front4 = child1
-    elif slot4 == 5:
-         slot4 = back5
-         front4 = cop1
-    else:
-         slot4 = back6
-         front4 = girl1
-
-    slot5 = outputNum[4]
-    if slot5 == 1:
-         slot5 = back1
-         front5 = child
-    elif slot5 == 2:
-         slot5 = back2
-         front5 = cop
-    elif slot5 == 3:
-         slot5 = back3
-         front5 = girl
-    elif slot5 == 4:
-         slot5 = back4
-         front5 = child1
-    elif slot5 == 5:
-         slot5 = back5
-         front5 = cop1
-    else:
-         slot5 = back6
-         front5 = girl1
-
-    slot6 = outputNum[5]
-    if slot6 == 1:
-         slot6 = back1
-         front6 = child
-    elif slot6 == 2:
-         slot6 = back2
-         front6 = cop
-    elif slot6 == 3:
-         slot6 = back3
-         front6 = girl
-    elif slot6 == 4:
-         slot6 = back4
-         front6 = child1
-    elif slot6 == 5:
-         slot6 = back5
-         front6 = cop1
-    else:
-         slot6 = back6
-         front6 = girl1
-
-def begin():
-    global slot1, slot2, slot3, slot4, slot5, slot6, front1, front2, front3, front4, front5, front6
-    image = slot1, slot2, slot3, slot4, slot5, slot6
-    msg = "                               Memory children Game\n\nEvery player select two cards\n\nIf the two cards are the same the player win 1 point"
-    choices = []
-    reply = buttonbox(msg, image=image, choices=choices)
-
-    if reply == "./images/back1.gif":
-        image = front1
-        msg = []
-        choices = []
-        reply = buttonbox(msg, image=image, choices=choices)
-        begin()
-
-    elif reply == "./images/back2.gif":
-        image = front2
-        msg = []
-        choices = []
-        reply = buttonbox(msg, image=image, choices=choices)
-        begin()
-
-    elif reply == "./images/back3.gif":
-        image = front3
-        msg = []
-        choices = []
-        reply = buttonbox(msg, image=image, choices=choices)
-        begin()
-
-    elif reply == "./images/back4.gif":
-        image = front4
-        msg = []
-        choices = []
-        reply = buttonbox(msg, image=image, choices=choices)
-        begin()
-
-    elif reply == "./images/back5.gif":
-        image = front5
-        msg = []
-        choices = []
-        reply = buttonbox(msg, image=image, choices=choices)
-        begin()
-
-    elif reply == "./images/back6.gif":
-        image = front6
-        msg = []
-        choices = []
-        reply = buttonbox(msg, image=image, choices=choices)
-        begin()
-
-    else:
-        sys.exit(0)
-
-
-game() 
-begin()
+if __name__ == "__main__":
+    main()
