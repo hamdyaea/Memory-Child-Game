@@ -1,36 +1,14 @@
-[![Awesome](https://awesome.re/badge.svg)](https://awesome.re)  
+# Memory Game for Children
 
+**Developer:** Hamdy Abou El Anein  
+**Contact:** info@daylightlinux.ch  
+**License:** GPL v3 (see LICENSE).
 
-# Memory Children Game
-
-## What's this game ?  
-
-This is a memory game where every player click on two cards. If the two cards are the same the player win. The cards are randomly sorted at every launch of the game. 
-
-![Screenshot](screenshot.png)  
-
-
-## What you need to make it work :  
-
-This game is made for Python 3.  
-
-Install all the packages for : Python 3.  
-
-easygui at least version 0.98  
-
-```sh
-sudo python3 -m pip install --upgrade easygui  
-```  
-
-
-## How to launch this game :  
+A simple modern Python 3/Tkinter matching game for children. Six cards form three pairs. Select two cards; matching pairs stay visible and mismatches flip back after a short delay. The game tracks moves and supports restarting.
 
 ```sh
 python3 memory.py
-```  
+python3 -m unittest discover -s tests -v
+```
 
-
-## Developer - Author  
-
-Hamdy Abou El Anein  
-
+No EasyGUI or third-party Python packages. The modern interface uses readable text symbols, rather than relying on old GIF assets. Original code: [old branch](https://github.com/hamdyaea/Memory-Child-Game/tree/old).
