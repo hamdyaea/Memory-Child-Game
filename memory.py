@@ -6,10 +6,11 @@
 from __future__ import annotations
 from dataclasses import dataclass, field
 import secrets
+from pathlib import Path
 import tkinter as tk
 from tkinter import ttk
 
-SYMBOLS = ("Cat", "Dog", "Bird")
+SYMBOLS = ("child", "cop", "girl")
 
 def shuffled_cards() -> list[str]:
     cards = list(SYMBOLS) * 2
@@ -49,7 +50,6 @@ class MemoryGame:
 def main() -> None:
     root = tk.Tk()
     root.title("Memory Game for Children")
-    root.geometry("410x370")
     game = MemoryGame()
     frame = ttk.Frame(root, padding=20)
     frame.pack(fill="both", expand=True)
@@ -57,12 +57,15 @@ def main() -> None:
     ttk.Label(frame, textvariable=info).pack(pady=10)
     board = ttk.Frame(frame)
     board.pack()
+    images = Path(__file__).resolve().parent / "images"
+    faces = {name: tk.PhotoImage(file=str(images / f"{name}.gif")) for name in SYMBOLS}
+    backs = [tk.PhotoImage(file=str(images / f"back{i}.gif")) for i in range(1, 7)]
     buttons = []
     waiting = False
     def render() -> None:
         for i, button in enumerate(buttons):
             show = i in game.revealed or i in game.matched
-            button.config(text=game.cards[i] if show else "?", state="disabled" if i in game.matched else "normal")
+            button.configure(image=faces[game.cards[i]] if show else backs[i])
     def click(index: int) -> None:
         nonlocal waiting
         if waiting:
@@ -83,8 +86,8 @@ def main() -> None:
         elif result == "first":
             info.set("Find its matching card")
     for i in range(6):
-        button = ttk.Button(board, text="?", width=12, command=lambda n=i: click(n))
-        button.grid(row=i // 3, column=i % 3, padx=4, pady=6, ipady=18)
+        button = ttk.Button(board, image=backs[i], command=lambda n=i: click(n))
+        button.grid(row=i // 3, column=i % 3, padx=4, pady=6)
         buttons.append(button)
     def restart() -> None:
         nonlocal game, waiting
